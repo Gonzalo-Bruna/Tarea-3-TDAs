@@ -16,5 +16,15 @@ typedef struct Pelicula{
 
 }Pelicula;
 
+typedef struct ListaPeliculas{
+
+    char * nombre; //nombre de la lista
+    BinaryTree * peliculas; //mapa ordernado de peliculas (ordenado por rating)
+    int puntos;
+
+}ListaPeliculas;
+
+
+
 
 #endif // FUNCTIONS_H
