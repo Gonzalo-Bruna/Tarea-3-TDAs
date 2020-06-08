@@ -24,7 +24,8 @@ typedef struct ListaPeliculas{
 
 }ListaPeliculas;
 
-
+//crea una lista de peliculas
+ListaPeliculas * crearListaPeliculas(char *);
 
 
 #endif // FUNCTIONS_H
