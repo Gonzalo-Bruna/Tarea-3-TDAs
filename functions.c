@@ -133,7 +133,7 @@ void anadirExtensionCSV(char * nombre){
 
 }
 
-int cargarListaPeliculas(HashTable * listasDePeliculas, HashTable * todasLasPeliculas){
+int cargarListaPeliculas(HashTable * listasDePeliculasTable, HashTable * todasLasPeliculas, List * listasDePeliculasList){
 
     printf("Para cargar la lista de peliculas, por favor ingrese el nombre del archivo csv sin su extension: ");
 
@@ -152,14 +152,30 @@ int cargarListaPeliculas(HashTable * listasDePeliculas, HashTable * todasLasPeli
 
     }
 
-    printf("\nPor favor ingrese un nombre para la nueva lista de peliculas: ");
-    fflush(stdin);
-    char nombreLista[100];
-    scanf("%[^\n]s", nombreLista);
-    fflush(stdin);
+    char * nombreLista = (char *) malloc (50 * sizeof(char));
+    ListaPeliculas * nuevaLista;
 
-    ListaPeliculas * nuevaLista = crearListaPeliculas(nombreLista);
-    insertHashTable(listasDePeliculas, nuevaLista->nombre, nuevaLista);
+    do{
+
+        printf("\nPor favor ingrese un nombre para la nueva lista de peliculas: ");
+        fflush(stdin);
+        scanf("%[^\n]s", nombreLista);
+        fflush(stdin);
+
+        nuevaLista = searchHashTable(listasDePeliculasTable,nombreLista);
+
+        if (nuevaLista){
+
+            printf("\nEl nombre que ha ingresado ya corresponde a una lista de peliculas existente, intentenlo nuevamente,\n");
+
+        }
+        else break;
+
+    }while(1);
+
+    nuevaLista = crearListaPeliculas(nombreLista);
+    insertHashTable(listasDePeliculasTable, nuevaLista->nombre, nuevaLista); //la tabla hash almacenará para acceder rapidamente a la lista elegida
+    pushBack(listasDePeliculasList, nuevaLista); //la lista nos servirá para mostrar por orden de creación las listas de peliculas
 
     char linea[1024];
 
@@ -194,6 +210,31 @@ int cargarListaPeliculas(HashTable * listasDePeliculas, HashTable * todasLasPeli
     Pelicula * pelicula = firstSortedMap(nuevaLista->peliculas);
     if (pelicula) printf("\nLa nueva lista \"%s\" ha sido creada con exito y se han agregado las peliculas\n\n", nombreLista);
 
+    system("pause");
+    return -1;
+}
+
+int verListasDePeliculas(List * listasDePeliculasList){
+
+    ListaPeliculas * listaPeliculas = first(listasDePeliculasList);
+    if(!listaPeliculas){
+
+        printf("\nAun no existe ninguna lista de peliculas\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    printf("\nEstas son todas las listas disponibles:\n\n");
+
+    while(listaPeliculas != NULL){
+
+        printf("%s\n", listaPeliculas->nombre);
+        listaPeliculas = next(listasDePeliculasList);
+
+    }
+
+    printf("\n");
     system("pause");
     return -1;
 }

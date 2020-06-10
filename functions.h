@@ -42,7 +42,12 @@ const char *get_csv_field (char *, int);
 //añade la extensión csv a la variable ingresada
 void anadirExtensionCSV(char *);
 
-//carga las peliculas de un archivo csv a una lista de peliculas
-int cargarListaPeliculas(HashTable *, HashTable *);
+/* Funciones del menú */
+
+//carga las peliculas de un archivo csv a una lista de peliculas, retorna -1 para que el menú aparezca nuevamente
+int cargarListaPeliculas(HashTable *, HashTable *, List *);
+
+//muestra las listas de peliculas
+int verListasDePeliculas(List *);
 
 #endif // FUNCTIONS_H
