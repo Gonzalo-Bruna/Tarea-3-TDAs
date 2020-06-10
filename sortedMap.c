@@ -1,279 +1,294 @@
-#include "sortedMap.h"
+/**
+ MIT License
 
-TreeNode * createTreeNode(int key, void * value) {
-    TreeNode * nodoArbol = (TreeNode *) calloc(1, sizeof(TreeNode));
-    nodoArbol->key = key;
-    nodoArbol->value = value;
-    return nodoArbol;
+ Copyright (c) 2018 Matias Barrientos.
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+
+#include "SortedMap.h"
+#include <stdlib.h>
+#include <assert.h>
+
+typedef struct TreeNode TreeNode;
+
+static TreeNode * _createTreeNode(const void * key, const void * data);
+
+struct TreeNode {
+    const void * key;
+    /*! Puntero al dato */
+    const void * data;
+
+    /*! Puntero al siguiente nodo */
+    TreeNode * next;
+
+    /*! Puntero al anterior nodo */
+    TreeNode * prev;
+};
+
+struct SortedMap {
+    /*! Puntero al incio (cabeza) de la lista */
+    TreeNode * head;
+
+    /*! Puntero al final (cola) de la lista */
+    TreeNode * tail;
+
+    /*! Punteor para poder recorrer la lista */
+    TreeNode * current;
+
+    SortedMapCompareCallBack compare;
+
+    /*! Cantidad de elemento en la lista */
+    long count;
+};
+
+static TreeNode* _createTreeNode(const void * key, const void * data) {
+    TreeNode  * new = (TreeNode *)malloc(sizeof(TreeNode));
+
+    assert(new != NULL);
+
+    new->key = key;
+    new->data = data;
+    new->prev = NULL;
+    new->next = NULL;
+    return new;
 }
 
-BinaryTree * createBinaryTree() {
-     BinaryTree * arbolBinario = (BinaryTree *) calloc( 1, sizeof(BinaryTree));
-     return arbolBinario;
+
+SortedMap * createSortedMap(SortedMapCompareCallBack compare) {
+    SortedMap * new = (SortedMap *)malloc(sizeof(SortedMap));
+    assert(new != NULL); // No hay memoria para reservar la SortedMapa.
+    new->head = new->tail = new->current = NULL;
+    new->count = 0;
+    new->compare = compare;
+    return new;
 }
 
-void insertBinaryTree(BinaryTree * tree, int key, void * value){
+long sortedMapCount(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
 
-    TreeNode * nodo = createTreeNode(key, value);
+    if (list->head == NULL) return 0;
 
-    if(!tree->root){
+    return list->count;
+}
 
-        tree->root = nodo;
-        tree->current = nodo;
+int emptySortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+    return list->count == 0;
+}
+
+void * firstSortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    if (list->head == NULL) return NULL;
+
+    list->current = list->head;
+
+    return (void *)list->current->data;
+}
+
+void * nextSortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    if (list->head == NULL || list->current == NULL || list->current->next == NULL) return NULL;
+
+    list->current = list->current->next;
+
+    return (void *)list->current->data;
+}
+
+void * lastSortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    if (list->head == NULL) return NULL;
+
+    list->current = list->tail;
+
+    return (void *)list->current->data;
+}
+
+void * prevSortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    if (list->head == NULL || list->current == NULL || list->current->prev == NULL) return NULL;
+
+    list->current = list->current->prev;
+
+    return (void *)list->current->data;
+}
+
+void __pushFront(SortedMap * list, const void * key, const void * value) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    TreeNode * new = _createTreeNode(key, value);
+
+    if (list->head == NULL) {
+        list->tail = new;
+    } else {
+        new->next = list->head;
+        list->head->prev = new;
+    }
+
+    list->head = new;
+    list->count += 1;
+}
+
+
+void insertSortedMap(SortedMap * list, const void * key, const void * value){
+
+    assert(list != NULL); // list no puede ser NULL.
+
+    TreeNode* aux= list->head;
+    //the minimum element
+    if (!aux || list->compare(aux->key,key)>0) {
+        __pushFront (list, key, value);
         return;
-
     }
 
-    //creo un nodo auxiliar para ir preguntando
-    TreeNode * aux = tree->root;
 
-    //recorreremos el arbol preguntando si el nuemero es mayor menor o igual, hasta que lleguemos a una posicion vacía
+    while(aux->next && list->compare(aux->next->key,key)<0)
+        aux=aux->next;
 
-    while(1){
-        if (nodo->key == aux->key) return; //si encontramos que ya existía el dato no se hace nada
+    list->current = aux;
 
-        //si el nodo que queremos insertar es menor que la raiz
-        if(nodo->key < aux->key){
+    TreeNode* new = _createTreeNode(key, value);
 
-            if(!aux->left){ // si es que es menor y no hay datos a la izquierda insertamos y terminamos la funcion
-                aux->left = nodo;
-                nodo->parent = aux;
-                tree->current = nodo;
-                return;
-            }
+    new->next = list->current->next;
+    new->prev = list->current;
 
-            //si es que si hay un dato, movemos aux a esa posicion
-            aux = aux->left;
-
-        }
-        else if(nodo->key > aux->key){
-
-            if(!aux->right){
-
-                aux->right = nodo;
-                nodo->parent = aux;
-                tree->current = nodo;
-                return;
-
-            }
-
-            aux = aux->right;
-
-        }
-
+    if (list->current->next != NULL) {
+        list->current->next->prev = new;
     }
+
+    list->current->next = new;
+
+    if (list->current == list->tail) {
+        list->tail = new;
+    }
+
+    list->count += 1;
 }
 
-void * searchBinaryTree(BinaryTree * tree, int key){
+void * __popFront(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
 
-    if(!tree || !tree->root) return NULL;
+    if (list->head == NULL) return NULL;
 
-    TreeNode * aux = tree->root;
+    TreeNode * aux = list->head;
 
-    while(1){
+    void * data = (void *)aux->data;
 
-        if(aux->key == key){
-
-           tree->current = aux;
-           return aux->value;
-
-        }
-
-        if(key < aux->key){
-
-            if(!aux->left) return NULL;
-
-            aux = aux->left;
-
-        }
-        else if(key > aux->key){
-
-            if(!aux->right) return NULL;
-
-            aux = aux->right;
-
-        }
-
+    if (list->head == list->tail) {
+        list->tail = list->head = NULL;
+    } else {
+        list->head = list->head->next;
+        list->head->prev = NULL;
     }
 
-}
-
-void * firstBinaryTree(BinaryTree * tree){
-
-    if(!tree || !tree->root) return NULL;
-
-    TreeNode * aux = tree->root;
-    while(aux->left){
-
-        aux = aux->left;
-
-    }
-
-    tree->current = aux;
-    return aux->value;
-
-}
-
-void * nextBinaryTree(BinaryTree * tree){
-
-    if(!tree || !tree->current) return NULL;
-
-    TreeNode * aux = tree->current; //creamos auxiliar para recorrer, nos situamos en el actual al que queremos avanzar
-
-    if(!aux->right){ // si no hay dato a la derecha debemos subir
-
-        if(!aux->parent) return NULL; //si estamos en el root y no hay datos a la derecha, estás en el ultimo, retornamos NULL
-        aux = aux->parent; //de lo contrario subimos
-
-        while(aux && aux->key < tree->current->key){ //mientras el padre sea menor que el dato actual seguimos subiendo
-
-            aux = aux->parent;
-
-        }
-
-        if(!aux) return NULL; //si llegamos al final y no hay más datos estabamos en el ultimo, retornamos NULL
-        tree->current = aux; // de lo contrario actualizamos el current
-
-    }
-    else{ // si es que hay dato a la derecha, nos vamos a el, y luego nos movemos a la izquierda hasta llegar al final
-
-        aux = aux->right;
-
-        while(aux->left){
-
-            aux = aux->left;
-
-        }
-
-        tree->current = aux;
-
-    }
-
-    return aux->value; //retornamos el valor
-
-}
-
-void * eraseKeyBinaryTree(BinaryTree * tree, int key){
-
-    if(!tree || !tree->root) return NULL;
-
-    TreeNode * aux = tree->root; //creamos un aux para situarnos en la raiz
-
-    while(1){ //creamos un ciclo "infinito", pondremos las condiciones de terminos en condicionales if
-
-        if(aux->key == key) break; // si encontramos el dato cortamos el ciclo
-
-        if(key < aux->key){
-
-            if(!aux->left) return NULL; //si es que no encontramos el dato a la izquierda retornamos NULL
-            aux = aux->left; //si la clave es menor entonces avanzamos a la izquierda
-
-        }
-        else if(key > aux->key){
-
-            if(!aux->right) return NULL;
-            aux = aux->right;
-        }
-
-    }
-
-    void * value = aux->value; //aca vamos a igualar el valor del dato que vamos a eliminar
-    //luego que encontramos el dato a eliminar hay que hacer el proceso de eliminacion
-
-    //creamos una copia para ir recorriendo con el aux llamada mayor
-    TreeNode * mayor = aux;
-
-    //si el nodo que queremos eliminar tiene dos hijos, entonces lo reemplazamos por el mayor del sub arbol de la izquierda del nodo
-    if(aux->left && aux->right){
-
-        mayor=aux->left;
-
-        while(mayor->right){
-
-            mayor = mayor->right;
-            //mayor se posicionará en el nodo mas grande, luego reemplazamos
-        }
-
-        mayor->parent = aux->parent; //hacemos que el padre del nodo eliminado apunte al que reemplazaremos
-
-        //ahora haremos que el hijo correspondiente del padre apunte al nuevo nodo que intercambiamos
-        if(aux->parent && aux->parent->right && aux->parent->right->key == aux->key ){
-
-            aux->parent->right = mayor;
-
-        }
-        else if(aux->parent && aux->parent->left && aux->parent->left->key == aux->key){
-
-            aux->parent->left = mayor;
-
-        }
-
-        //si uno de los nodos hijos del nodo a eliminar es de los que estamos haciendo el intercambio,
-        //entonces no reemplazamos, de lo contrario si lo hacemos
-
-        if(aux->left && aux->left->key != mayor->key){
-
-            mayor->left = aux->left;
-
-        }
-        else if(aux->right && aux->right->key != mayor->key){
-
-            mayor->right = aux->right;
-
-        }
-
-    }
-    else{ //si es que solo tiene un hijo o no tiene, haremos el proceso dependiendo.
-
-        if(aux->left){ //si tiene nodo a la izquierda, lo enlazamos con el padre
-
-            aux->left->parent = aux->parent; //debemos conectar el hijo del nodo que vamos a eliminar con el padre del nodo a eliminar
-            if(aux->parent->right && aux->parent->right->key == aux->key){
-
-                aux->parent->right = aux->left; //debemos hacer apuntar el nuevo nodo a lo que apuntaba el nodo a eliminar
-
-            }
-            else if(aux->parent->left && aux->parent->left->key == aux->key){
-
-                aux->parent->left = aux->left;
-
-            }
-        }
-        else if(aux->right){ //hacemos el mismo proceso si el nodo está a la derecha
-
-            aux->right->parent = aux->parent;
-            if(aux->parent->right && aux->parent->right->key == aux->key){
-
-                aux->parent->right = aux->left;
-
-            }
-            else if(aux->parent->left && aux->parent->left->key == aux->key){
-
-                aux->parent->left = aux->left;
-
-            }
-
-
-        }
-        else if(!aux->left && !aux->right){ //si no hay ni nodo a la izquierda ni a la derecha, lo eliminamos
-
-            if(aux->parent->left && aux->parent->left->key == aux->key){
-
-                aux->parent->left = NULL; //para eliminar debemos hacer NULL el puntero al dato que eliminariamos
-
-            }
-            else if(aux->parent->right && aux->parent->right->key == aux->key){
-
-                aux->parent->right = NULL;
-
-            }
-
-        }
-
-    }
-
-    //limpiamos la memoria y retornamos el dato
     free(aux);
-    return value;
 
+    list->count -= 1;
+
+    return data;
 }
+
+void * __popBack(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    if (list->head == NULL) return NULL;
+
+    TreeNode * aux = list->tail;
+
+    void * data = (void *)aux->data;
+
+    if (list->tail == list->head) {
+        list->tail = list->head = NULL;
+    } else {
+        list->tail = list->tail->prev;
+        list->tail->next = NULL;
+    }
+
+    free(aux);
+
+    list->count -= 1;
+
+    return data;
+}
+
+void * upperBoundSortedMap(SortedMap * map, const void * key){
+    printf("this function is not implemented yet\n");
+    return NULL;
+}
+
+void* searchSortedMap(SortedMap * list, const void * key) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    TreeNode* aux= list->head;
+    //the minimum element
+    while (aux && list->compare(aux->key,key)!=0 ) aux=aux->next;
+
+    list->current=aux;
+    if (list->head == NULL || list->current == NULL) return NULL;
+
+    return (void *) aux->data;
+}
+
+void * eraseKeySortedMap(SortedMap * list, const void * key) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    TreeNode* aux= list->head;
+    //the minimum element
+    while (aux && list->compare(aux->key,key)!=0 ) aux=aux->next;
+
+    list->current=aux;
+    if (list->head == NULL || list->current == NULL) return NULL;
+
+    if (list->current == list->head) {
+        return __popFront(list);
+    } else if (list->current == list->tail) {
+        return __popBack(list);
+    } else {
+        if (aux->next != NULL) {
+            aux->next->prev = aux->prev;
+        }
+
+        if (aux->prev != NULL) {
+            aux->prev->next = aux->next;
+        }
+    }
+
+    void * data = (void *)aux->data;
+
+    list->current = aux->next;
+
+    free(aux);
+
+    list->count -= 1;
+
+    return data;
+}
+
+void removeAllSortedMap(SortedMap * list) {
+    assert(list != NULL); // list no puede ser NULL.
+
+    while (list->head != NULL) {
+        __popFront(list);
+    }
+}
+

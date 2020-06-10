@@ -6,11 +6,15 @@ int main()
 {
 
     int opcion;
-    printf("Bienvenido a nuestro sistema recomendador de peliculas!\n\n");
+    printf("Bienvenido a nuestro sistema recomendador de peliculas!\n");
+
+    HashTable * listasDePeliculas = createHashTable(100);
+    HashTable * todasLasPeliculas = createHashTable(100);
+
 
     do{
 
-        printf("Que desea hacer?\n\n");
+        printf("\nQue desea hacer?\n\n");
         printf("Opcion 1: Cargar lista de peliculas\n");
         printf("Opcion 2: Ver listas de peliculas\n");
         printf("Opcion 3: Ver peliculas de una lista\n");
@@ -23,6 +27,18 @@ int main()
 
         scanf("%d", &opcion);
         if(opcion < 0 || opcion > 6) printf("\nDebe ingresar una opcion correcta\n\n");
+        else{
+
+            switch(opcion){
+
+                case 1: opcion  = cargarListaPeliculas(listasDePeliculas, todasLasPeliculas);
+                    break;
+                default:
+                    break;
+
+            }
+
+        }
 
     }while(opcion < 0 || opcion > 6);
 
