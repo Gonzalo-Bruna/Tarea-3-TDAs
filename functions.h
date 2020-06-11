@@ -42,6 +42,8 @@ const char *get_csv_field (char *, int);
 //añade la extensión csv a la variable ingresada
 void anadirExtensionCSV(char *);
 
+void ordenarAlfabeticamente(List *);
+
 /* Funciones del menú */
 
 //carga las peliculas de un archivo csv a una lista de peliculas, retorna -1 para que el menú aparezca nuevamente

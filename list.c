@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "list.h"
 
 //funciones de creacion de listas y nodos
@@ -22,6 +23,18 @@ Node * createNode(void * data){
     node->next = NULL;
     node->prev = NULL;
     return node;
+
+}
+
+void * returnNodeData(Node * node){
+
+    return node->data;
+
+}
+
+Node * retornarNodoCabeza(List * list){
+
+    return list->head;
 
 }
 

@@ -133,6 +133,42 @@ void anadirExtensionCSV(char * nombre){
 
 }
 
+void ordenarAlfabeticamente(List * listasDePeliculasList){
+
+    Node * p1 = retornarNodoCabeza(listasDePeliculasList);
+    Node * j1;
+
+    ListaPeliculas * p;
+    ListaPeliculas * j;
+    ListaPeliculas * aux;
+
+    while(p1){
+
+        j1 = p1->next;
+        p = returnNodeData(p1);
+        while(j1){
+
+            j = returnNodeData(j1);
+            if(strcmp(p->nombre, j->nombre) > 0){
+
+                p = j1->data;
+
+                aux = j1->data;
+                j1->data = p1->data;
+                p1->data = aux;
+
+            }
+
+
+            j1 = j1->next;
+        }
+
+        p1 = p1->next;
+    }
+
+
+}
+
 int cargarListaPeliculas(HashTable * listasDePeliculasTable, HashTable * todasLasPeliculas, List * listasDePeliculasList){
 
     printf("\nPara cargar la lista de peliculas, por favor ingrese el nombre del archivo csv sin su extension: ");
@@ -224,6 +260,10 @@ int verListasDePeliculas(List * listasDePeliculasList){
         return -1;
 
     }
+
+    ordenarAlfabeticamente(listasDePeliculasList);
+
+    listaPeliculas = first(listasDePeliculasList);
 
     printf("\nEstas son todas las listas disponibles:\n\n");
 
