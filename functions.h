@@ -50,4 +50,7 @@ int cargarListaPeliculas(HashTable *, HashTable *, List *);
 //muestra las listas de peliculas
 int verListasDePeliculas(List *);
 
+//muestra las peliculas de una lista
+int verPeliculasLista(HashTable *, List *);
+
 #endif // FUNCTIONS_H

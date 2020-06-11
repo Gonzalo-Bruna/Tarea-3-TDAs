@@ -135,7 +135,7 @@ void anadirExtensionCSV(char * nombre){
 
 int cargarListaPeliculas(HashTable * listasDePeliculasTable, HashTable * todasLasPeliculas, List * listasDePeliculasList){
 
-    printf("Para cargar la lista de peliculas, por favor ingrese el nombre del archivo csv sin su extension: ");
+    printf("\nPara cargar la lista de peliculas, por favor ingrese el nombre del archivo csv sin su extension: ");
 
     char nombreArchivo[100];
     scanf("%s", nombreArchivo);
@@ -231,6 +231,62 @@ int verListasDePeliculas(List * listasDePeliculasList){
 
         printf("%s\n", listaPeliculas->nombre);
         listaPeliculas = next(listasDePeliculasList);
+
+    }
+
+    printf("\n");
+    system("pause");
+    return -1;
+}
+
+int verPeliculasLista(HashTable * listasDePeliculasTable, List * listasDePeliculasList){
+
+    ListaPeliculas * listaPeliculas = firstHashTable(listasDePeliculasTable);
+    if(!listaPeliculas){
+
+        printf("\nAun no ha sido agregada ninguna lista de peliculas\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    printf("\nEstas son las listas que han sido agregadas a la aplicacin: \n\n");
+    listaPeliculas = first(listasDePeliculasList);
+
+    while(listaPeliculas){
+
+        printf("%s\n", listaPeliculas->nombre);
+        listaPeliculas = next(listasDePeliculasList);
+
+    }
+
+    char nombreLista[50];
+
+    do{
+
+        printf("\nPor favor ingrese el nombre de la lista de peliculas que desea ver: ");
+        fflush(stdin);
+        scanf("%[^\n]s", nombreLista);
+        fflush(stdin);
+
+        listaPeliculas = searchHashTable(listasDePeliculasTable,nombreLista);
+
+        if (!listaPeliculas){
+
+            printf("\nNo existe ninguna lista que tenga este nombre, intentelo nuevamente,\n");
+
+        }
+        else break;
+
+    }while(1);
+
+    printf("\nEstas son las peliculas de la lista de peliculas seleccionada: \n\n");
+
+    Pelicula * pelicula = firstSortedMap(listaPeliculas->peliculas);
+    while(pelicula != NULL){
+
+        printf("Titulo: %s, ID: %s, IMDb rating: %.1f\n", pelicula->titulo, pelicula->id, pelicula->rating);
+        pelicula = nextSortedMap(listaPeliculas->peliculas);
 
     }
 

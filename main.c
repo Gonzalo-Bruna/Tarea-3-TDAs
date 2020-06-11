@@ -8,7 +8,7 @@ int main()
     int opcion;
     printf("Bienvenido a nuestro sistema recomendador de peliculas!\n");
 
-    HashTable * listasDePeliculas = createHashTable(100);
+    HashTable * listasDePeliculasTable = createHashTable(10);
     List * listasDePeliculasList = createList();
     HashTable * todasLasPeliculas = createHashTable(100);
 
@@ -32,9 +32,12 @@ int main()
 
             switch(opcion){
 
-                case 1: opcion  = cargarListaPeliculas(listasDePeliculas, todasLasPeliculas, listasDePeliculasList);
+                case 1: opcion  = cargarListaPeliculas(listasDePeliculasTable, todasLasPeliculas, listasDePeliculasList);
                     break;
                 case 2: opcion = verListasDePeliculas(listasDePeliculasList);
+                    break;
+                case 3: opcion = verPeliculasLista(listasDePeliculasTable, listasDePeliculasList);
+                    break;
                 default:
                     break;
 
