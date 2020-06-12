@@ -11,7 +11,7 @@ int main()
     HashTable * listasDePeliculasTable = createHashTable(10);
     List * listasDePeliculasList = createList();
     HashTable * todasLasPeliculas = createHashTable(100);
-
+    List * listasOrdenadasPorPuntos = createList();
 
     do{
 
@@ -39,6 +39,10 @@ int main()
                 case 3: opcion = verPeliculasLista(listasDePeliculasTable, listasDePeliculasList);
                     break;
                 case 4: opcion = verInformacionPelicula(todasLasPeliculas);
+                    break;
+                case 5: opcion = marcarPeliculaComoPreferida(todasLasPeliculas, listasDePeliculasTable, listasOrdenadasPorPuntos);
+                    break;
+                case 6: opcion = recomendarPelicula(todasLasPeliculas, listasOrdenadasPorPuntos);
                     break;
                 default:
                     break;

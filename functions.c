@@ -1,6 +1,6 @@
 #include "functions.h"
 
-int cmp(const void * key1, const void * key2) {
+int cmpfloat(const void * key1, const void * key2) {
     const float * Key1 = key1;
     const float * Key2 = key2;
     if(*Key1 > *Key2) return -1;
@@ -12,7 +12,7 @@ ListaPeliculas * crearListaPeliculas(char * nombre){
 
     ListaPeliculas * nuevaLista = (ListaPeliculas *) malloc (sizeof(ListaPeliculas));
     nuevaLista->nombre = nombre;
-    nuevaLista->peliculas = createSortedMap(cmp);
+    nuevaLista->peliculas = createSortedMap(cmpfloat);
     nuevaLista->puntos = 0;
     return nuevaLista;
 
@@ -26,6 +26,7 @@ Pelicula * crearPelicula(char * id, char * titulo, float rating, int year, char 
     nuevaPelicula->rating = rating;
     nuevaPelicula->year = year;
     nuevaPelicula->numVotos = numVotos;
+    nuevaPelicula->marcada = false;
     nuevaPelicula->generos = createList();
     nuevaPelicula->directores = createList();
     nuevaPelicula->listasDePeliculasAsociadas = createList();
@@ -167,6 +168,39 @@ void ordenarAlfabeticamente(List * listasDePeliculasList){
         p1 = p1->next;
     }
 
+}
+
+void ordenarPorPuntos(List * listasOrdenadasPorPuntos){
+
+    Node * p1 = retornarNodoCabeza(listasOrdenadasPorPuntos);
+    Node * j1;
+
+    ListaPeliculas * p;
+    ListaPeliculas * j;
+    ListaPeliculas * aux;
+
+    while(p1){
+
+        j1 = p1->next;
+        p = returnNodeData(p1);
+        while(j1){
+
+            j = returnNodeData(j1);
+            if(p->puntos < j->puntos){
+
+                p = j1->data;
+
+                aux = j1->data;
+                j1->data = p1->data;
+                p1->data = aux;
+
+            }
+
+            j1 = j1->next;
+        }
+
+        p1 = p1->next;
+    }
 
 }
 
@@ -407,6 +441,104 @@ int verInformacionPelicula(HashTable * todasLasPeliculas){
 
         printf("%s\n", nombreLista);
         nombreLista = next(pelicula->listasDePeliculasAsociadas);
+
+    }
+
+    printf("\n");
+    system("pause");
+    return -1;
+
+}
+
+int marcarPeliculaComoPreferida(HashTable * todasLasPeliculas, HashTable * listasDePeliculasTable, List * listasOrdenadasPorPuntos){
+
+    Pelicula * pelicula = firstHashTable(todasLasPeliculas);
+    if(!pelicula){
+
+        printf("\nAun no ha sido agregada ninguna pelicula\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    char id[20];
+    printf("\nPor favor ingrese el id de la pelicula que desea marcar como favorita: ");
+    fflush(stdin);
+    scanf("%s", id);
+    fflush(stdin);
+
+    pelicula = searchHashTable(todasLasPeliculas, id);
+    if (!pelicula){
+
+        printf("\nNo hemos encontrado ninguna pelicula que coicida con este id\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    if(pelicula->marcada == true){
+
+        printf("\nLa pelicula ya ha sido marcada como favorita anteriormente\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    pelicula->marcada = true;
+
+    char * nombreListasAsociadas = first(pelicula->listasDePeliculasAsociadas);
+    ListaPeliculas * listaPeliculas;
+
+    while(nombreListasAsociadas){
+        listaPeliculas = searchHashTable(listasDePeliculasTable, nombreListasAsociadas);
+        listaPeliculas->puntos++;
+        pushBack(listasOrdenadasPorPuntos, listaPeliculas); //guarda las listas ordenadas por puntos (se ordenan posteriormente)
+        nombreListasAsociadas = next(pelicula->listasDePeliculasAsociadas);
+    }
+
+    ordenarPorPuntos(listasOrdenadasPorPuntos);
+
+    printf("\nLa pelicula ha sido marcada como favorita\n\n");
+    system("pause");
+    return -1;
+
+}
+
+int recomendarPelicula(HashTable * todasLasPeliculas, List * listasOrdenadasPorPuntos){
+
+    Pelicula * pelicula = firstHashTable(todasLasPeliculas);
+    if(!pelicula){
+
+        printf("\nAun no ha sido agregada ninguna pelicula\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    ListaPeliculas * listaPeliculas = first(listasOrdenadasPorPuntos);
+    if(!listaPeliculas){
+
+        printf("\nAun no ha marcado ninguna pelicula como favorita\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    printf("\nEstas son las Peliculas que te recomendamos ver de la lista \"%s\": \n\n", listaPeliculas->nombre);
+
+    pelicula = firstSortedMap(listaPeliculas->peliculas);
+    int cont = 0;
+
+    while(cont < 10 && pelicula){
+
+        if(pelicula->marcada == false){
+
+            printf("Titulo: %s, Rating: %.1f\n", pelicula->titulo, pelicula->rating);
+            cont++;
+
+        }
+
+        pelicula = nextSortedMap(listaPeliculas->peliculas);
 
     }
 
