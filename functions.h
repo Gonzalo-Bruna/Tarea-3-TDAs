@@ -19,6 +19,7 @@ typedef struct Pelicula{
     List * generos; // posicion 12 del archivo csv
     int numVotos; // posicion 13 del archivo csv
     List * directores; // posicion 15 del archivo csv
+    List * listasDePeliculasAsociadas; //guardará el nombre de las listas
 
 }Pelicula;
 
@@ -54,5 +55,8 @@ int verListasDePeliculas(List *);
 
 //muestra las peliculas de una lista
 int verPeliculasLista(HashTable *, List *);
+
+//muestra la información de una pelicula y las listas de peliculas a las que está asociada
+int verInformacionPelicula(HashTable *);
 
 #endif // FUNCTIONS_H

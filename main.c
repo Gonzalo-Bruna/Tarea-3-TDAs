@@ -38,6 +38,8 @@ int main()
                     break;
                 case 3: opcion = verPeliculasLista(listasDePeliculasTable, listasDePeliculasList);
                     break;
+                case 4: opcion = verInformacionPelicula(todasLasPeliculas);
+                    break;
                 default:
                     break;
 

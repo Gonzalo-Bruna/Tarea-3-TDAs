@@ -28,6 +28,7 @@ Pelicula * crearPelicula(char * id, char * titulo, float rating, int year, char 
     nuevaPelicula->numVotos = numVotos;
     nuevaPelicula->generos = createList();
     nuevaPelicula->directores = createList();
+    nuevaPelicula->listasDePeliculasAsociadas = createList();
 
     char caracter[2] = ",";
     char * genero;
@@ -229,15 +230,28 @@ int cargarListaPeliculas(HashTable * listasDePeliculasTable, HashTable * todasLa
             char * id = get_csv_field(linea, 1);
             char * titulo = get_csv_field(linea, 5);
             float rating = atof( get_csv_field(linea, 8) );
-            int year = atoi( get_csv_field(linea, 9) );
+            int year = atoi( get_csv_field(linea, 10) );
             generos = get_csv_field(linea, 11);
             int numVotos = atoi( get_csv_field(linea, 12) );
             char * directores = get_csv_field(linea, 14);
 
-            Pelicula * pelicula = crearPelicula(id, titulo, rating, year, generos, numVotos, directores);
-            //cada pelicula que es creada se almacena en la nueva lista de peliculas
-            insertSortedMap(nuevaLista->peliculas, &pelicula->rating, pelicula);
-            insertHashTable(todasLasPeliculas, pelicula->id, pelicula);
+            Pelicula * pelicula = searchHashTable(todasLasPeliculas, id);
+            if(!pelicula){
+
+                //si la pelicula no existe creamos memoria para una y se ingresa en los tdas correspondientes
+                pelicula = crearPelicula(id, titulo, rating, year, generos, numVotos, directores);
+                insertSortedMap(nuevaLista->peliculas, &pelicula->rating, pelicula);
+                insertHashTable(todasLasPeliculas, pelicula->id, pelicula);
+                pushBack(pelicula->listasDePeliculasAsociadas, nuevaLista->nombre);
+
+            }
+            else{
+
+                //si la pelicula ya existía entonces se guarda en la lista asociada, y en la lista de listas asociadas se guarda el nombre de la lista
+                insertSortedMap(nuevaLista->peliculas, &pelicula->rating, pelicula);
+                pushBack(pelicula->listasDePeliculasAsociadas, nuevaLista->nombre);
+
+            }
 
         }
 
@@ -333,4 +347,71 @@ int verPeliculasLista(HashTable * listasDePeliculasTable, List * listasDePelicul
     printf("\n");
     system("pause");
     return -1;
+}
+
+int verInformacionPelicula(HashTable * todasLasPeliculas){
+
+    Pelicula * pelicula = firstHashTable(todasLasPeliculas);
+    if(!pelicula){
+
+        printf("\nAun no han sido agregadas ninguna lista de peliculas\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    char id[20];
+    printf("\nPor favor ingrese el id de la pelicula que desea buscar: ");
+    fflush(stdin);
+    scanf("%s", id);
+    fflush(stdin);
+
+    pelicula = searchHashTable(todasLasPeliculas, id);
+    if (!pelicula){
+
+        printf("\nNo hemos encontrado ninguna pelicula que coicida con este id\n\n");
+        system("pause");
+        return -1;
+
+    }
+
+    printf("\nEsta es la información de la pelicula solicitada: \n\n");
+    printf("Titulo: %s\nRating: %.1f\nYear: %d\nNumero de votos: %d\nGeneros: ", pelicula->titulo, pelicula->rating, pelicula->year, pelicula->numVotos);
+
+    char * genero = first(pelicula->generos);
+    printf("%s", genero);
+    while(genero){
+
+        genero = next(pelicula->generos);
+        if (!genero) break;
+        printf(", %s", genero);
+
+    }
+
+    char * director = first(pelicula->directores);
+    printf("\nDirectores: ");
+    printf("%s", director);
+
+    while(director){
+
+        director = next(pelicula->directores);
+        if(!director) break;
+        printf(", %s", director);
+
+    }
+
+    printf("\n\nY estas son las listas de peliculas asociadas: \n\n");
+    char * nombreLista = first(pelicula->listasDePeliculasAsociadas);
+
+    while(nombreLista != NULL){
+
+        printf("%s\n", nombreLista);
+        nombreLista = next(pelicula->listasDePeliculasAsociadas);
+
+    }
+
+    printf("\n");
+    system("pause");
+    return -1;
+
 }
